@@ -17,12 +17,12 @@ package dagger.reflect;
 
 import dagger.MembersInjector;
 import dagger.Subcomponent;
+import dagger.reflect.Binding.LinkedBinding;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.inject.Provider;
 import org.jetbrains.annotations.Nullable;
 
 import static dagger.reflect.DaggerReflect.notImplemented;
@@ -92,8 +92,8 @@ final class ComponentInvocationHandler implements InvocationHandler {
       }
 
       Key key = Key.of(findQualifier(method.getDeclaredAnnotations()), returnType);
-      Provider<?> provider = scope.getProvider(key);
-      return new ProviderMethodInvocationHandler(provider);
+      LinkedBinding<?> provider = scope.getBinding(key);
+      return new BindingMethodInvocationHandler(provider);
     }
 
     throw new IllegalStateException(method.toString()); // TODO unsupported method shape
@@ -103,15 +103,15 @@ final class ComponentInvocationHandler implements InvocationHandler {
     @Nullable Object invoke(Object[] args);
   }
 
-  private static final class ProviderMethodInvocationHandler implements MethodInvocationHandler {
-    private final Provider<?> provider;
+  private static final class BindingMethodInvocationHandler implements MethodInvocationHandler {
+    private final LinkedBinding<?> binding;
 
-    ProviderMethodInvocationHandler(Provider<?> provider) {
-      this.provider = provider;
+    BindingMethodInvocationHandler(LinkedBinding<?> binding) {
+      this.binding = binding;
     }
 
-    @Override public Object invoke(Object[] args) {
-      return provider.get();
+    @Override public @Nullable Object invoke(Object[] args) {
+      return binding.get();
     }
   }
 
