@@ -7,15 +7,17 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 final class Linker {
-  static LinkedBinding<?> link(BindingMap bindings, Key key, UnlinkedBinding unlinkedBinding) {
-    return new Linker(bindings).performLinking(key, unlinkedBinding);
+  static LinkedBinding<?> link(Scope scope, Key key, UnlinkedBinding unlinkedBinding) {
+    return new Linker(scope).performLinking(key, unlinkedBinding);
   }
 
+  private final Scope scope;
   private final BindingMap bindings;
   private final Map<Key, Binding> chain = new LinkedHashMap<>();
 
-  private Linker(BindingMap bindings) {
-    this.bindings = bindings;
+  private Linker(Scope scope) {
+    this.scope = scope;
+    this.bindings = scope.bindings;
   }
 
   LinkedBinding<?> get(Key key) {
@@ -39,7 +41,7 @@ final class Linker {
       throw failure(key, "Dependency cycle", "forms a cycle");
     }
     chain.put(key, unlinkedBinding);
-    LinkedBinding<?> linkedBinding = unlinkedBinding.link(this);
+    LinkedBinding<?> linkedBinding = unlinkedBinding.link(this, scope);
     chain.remove(key);
 
     return bindings.replace(key, unlinkedBinding, linkedBinding);

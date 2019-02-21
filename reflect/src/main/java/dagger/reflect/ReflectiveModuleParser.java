@@ -4,6 +4,7 @@ import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.MapKey;
 import dagger.Provides;
+import dagger.android.ContributesAndroidInjector;
 import dagger.multibindings.ElementsIntoSet;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.IntoSet;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.jetbrains.annotations.Nullable;
 
+import static dagger.reflect.DaggerReflect.notImplemented;
 import static dagger.reflect.Reflection.findAnnotation;
 import static dagger.reflect.Reflection.findMapKey;
 import static dagger.reflect.Reflection.findQualifier;
@@ -56,6 +58,18 @@ final class ReflectiveModuleParser {
               Binding binding = new UnlinkedGuavaOptionalBinding(method);
               addBinding(scopeBuilder, key, binding, annotations);
             } catch (NoClassDefFoundError ignored) {
+            }
+          } else {
+            ContributesAndroidInjector contributesAndroidInjector =
+                method.getAnnotation(ContributesAndroidInjector.class);
+            if (contributesAndroidInjector != null) {
+              // TODO check return type is a supported type? not parameterized? something else?
+              Class<?>[] modules = contributesAndroidInjector.modules();
+              Class<?> androidType = (Class<?>) returnType;
+              Binding.UnlinkedBinding binding = new UnlinkedAndroidInjectorFactoryBinding(modules, androidType);
+              // TODO Add Map<Class<?>, Provider<AndroidInjector.Factory<?>>> binding
+              // TODO Add Map<String, Provider<AndroidInjector.Factory<?>>> binding
+              throw notImplemented("@ContributesAndroidInjector");
             }
           }
         } else {

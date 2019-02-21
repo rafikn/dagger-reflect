@@ -9,7 +9,7 @@ import javax.inject.Provider;
 import org.jetbrains.annotations.Nullable;
 
 final class Scope {
-  private final BindingMap bindings;
+  final BindingMap bindings;
   private final JustInTimeLookup.Factory jitLookupFactory;
   /** The annotation denoting {@linkplain javax.inject.Scope scoped} bindings for this instance. */
   private final @Nullable Annotation annotation;
@@ -32,7 +32,7 @@ final class Scope {
     if (binding != null) {
       return binding instanceof LinkedBinding<?>
           ? (LinkedBinding<?>) binding
-          :  Linker.link(bindings, key, (UnlinkedBinding) binding);
+          :  Linker.link(this, key, (UnlinkedBinding) binding);
     }
 
     return parent != null

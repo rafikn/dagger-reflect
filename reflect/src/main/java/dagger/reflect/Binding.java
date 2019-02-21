@@ -18,7 +18,7 @@ package dagger.reflect;
 import javax.inject.Provider;
 
 interface Binding {
-  LinkedBinding<?> link(Linker linker);
+  LinkedBinding<?> link(Linker linker, Scope scope);
   Binding asScoped();
   @Override String toString();
 
@@ -29,7 +29,7 @@ interface Binding {
   }
 
   abstract class LinkedBinding<T> implements Binding, Provider<T> {
-    @Override public final LinkedBinding<?> link(Linker linker) {
+    @Override public final LinkedBinding<?> link(Linker linker, Scope scope) {
       return this;
     }
 
